@@ -38,7 +38,47 @@ const createToken = (code) => {
   });
 }
 
+const authorize = (callback) => {
+  const token = fs.readFileSync(TOKEN_PATH);
+
+  oauth2Client.setCredentials(JSON.parse(token));
+
+  return callback(oauth2Client);
+}
+
+const listLabels = async (auth) => {
+  const gmail = google.gmail({ version: 'v1', auth });
+
+  return await gmail.users.labels.list({ userId: 'me' });
+}
+
+const listMessages = async (auth) => {
+  const gmail = google.gmail({ version: 'v1', auth });
+
+  return await gmail.users.messages.list({ userId: 'me' });
+}
+
+const getMessages = async (auth) => {
+  const gmail = google.gmail({ version: 'v1', auth });
+
+  const list = await gmail.users.messages.list({ userId: 'me' });
+
+  const result = Promise.all(
+    list.data.messages.map((message) => {
+      const mail = gmail.users.messages.get({ 'userId': 'me', 'id': message.id });
+
+      return mail;
+    })
+  );
+
+  return result;
+}
+
 module.exports = {
   url,
-  createToken
+  createToken,
+  authorize,
+  listLabels,
+  listMessages,
+  getMessages
 }
