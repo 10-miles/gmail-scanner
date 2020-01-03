@@ -16,13 +16,8 @@ router.get('/certification', function (req, res) {
 
   oauth.createToken(code);
 
-  res.json({
-    "success": {
-      "message": {
-        "list": "/gmail/list"
-      }
-    }
-  });
+  res.writeHead(200, {"Content-Type": "text/html"});
+  fs.createReadStream("./index.html").pipe(res);
 })
 
 module.exports = router;
